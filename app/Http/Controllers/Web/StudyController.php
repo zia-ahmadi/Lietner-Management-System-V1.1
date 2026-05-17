@@ -134,7 +134,9 @@ class StudyController extends Controller
 
     public function reviewToday(): View
     {
-        $dueCards = $this->userCardQuery((int) auth()->id())
+        $userId = (int) auth()->id();
+
+        $dueCards = $this->userCardQuery($userId)
             ->with('deck:id,name')
             ->due()
             ->orderBy('next_review_at')
@@ -142,10 +144,16 @@ class StudyController extends Controller
 
         $currentCard = $dueCards->first();
 
+        $decks = Deck::query()
+            ->where('user_id', $userId)
+            ->orderBy('name')
+            ->get();
+
         return view('review-today', [
             'currentCard' => $currentCard,
             'dueCount' => $dueCards->count(),
             'upcomingCards' => $dueCards->skip(1)->take(5),
+            'decks' => $decks,
         ]);
     }
 
