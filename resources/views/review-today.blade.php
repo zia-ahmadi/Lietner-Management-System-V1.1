@@ -1,0 +1,60 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="page-header">
+    <h1>Review Today</h1>
+    <span class="muted">Due cards: {{ $dueCount }}</span>
+</div>
+
+@if ($currentCard)
+    <section class="panel" style="margin-bottom:1rem;">
+        <div class="meta">Skill: {{ $currentCard->deck?->name }} | Box {{ $currentCard->box }}</div>
+        <div class="text-panel scroll" style="margin-top:0.7rem;">
+            <div class="text-rich text-front">{{ $currentCard->front_text }}</div>
+        </div>
+
+        <div class="actions" style="margin-top:1rem;">
+            <button id="show-answer-btn" type="button" class="btn btn-soft">Show Answer</button>
+            <form method="POST" action="{{ route('review.submit', $currentCard->id) }}">@csrf<button type="submit" name="result" value="correct" class="btn btn-primary">I Got It Correct</button></form>
+            <form method="POST" action="{{ route('review.submit', $currentCard->id) }}">@csrf<button type="submit" name="result" value="wrong" class="btn btn-soft">I Got It Wrong</button></form>
+        </div>
+
+        <div id="answer-box" class="panel" style="display:none; margin-top:0.9rem; background:#f7fffc; border-color:#c8e9e3;">
+            <strong>Answer</strong>
+            <div class="text-panel scroll" style="margin-top:0.45rem;">
+                <div class="text-rich">{{ $currentCard->back_text ?: 'No answer saved for this card.' }}</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h3 style="margin-bottom:0.7rem;">Next Due Cards</h3>
+        @forelse ($upcomingCards as $card)
+            <div class="list-item" style="margin-bottom:0.5rem;">
+                <div class="text-rich">{{ \Illuminate\Support\Str::limit($card->front_text, 180) }}</div>
+                <div class="meta" style="margin-top:0.25rem;">Due: {{ $card->next_review_at?->format('Y-m-d H:i') }}</div>
+            </div>
+        @empty
+            <p class="muted">No more cards queued after this one.</p>
+        @endforelse
+    </section>
+
+    <script>
+        (function () {
+            const button = document.getElementById('show-answer-btn');
+            const answerBox = document.getElementById('answer-box');
+            if (!button || !answerBox) return;
+            button.addEventListener('click', function () {
+                answerBox.style.display = 'block';
+                button.style.display = 'none';
+            });
+        })();
+    </script>
+@else
+    <section class="panel">
+        <h2>No cards due right now.</h2>
+        <p class="muted">You're done for now. Come back later for your next repetition cycle.</p>
+        <a href="{{ route('cards.index') }}" class="btn btn-soft">Go To Cards</a>
+    </section>
+@endif
+@endsection
