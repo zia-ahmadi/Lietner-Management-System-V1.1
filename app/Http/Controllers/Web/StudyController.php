@@ -198,6 +198,63 @@ class StudyController extends Controller
         return view('materials', compact('materials'));
     }
 
+    /**
+     * Management dashboard for user data (clear per-skill cards, reset app).
+     */
+    public function manage(): View
+    {
+        $userId = (int) auth()->id();
+
+        $decks = Deck::query()
+            ->where('user_id', $userId)
+            ->withCount('cards')
+            ->withCount(['cards as due_cards_count' => fn ($q) => $q->due()])
+            ->orderBy('name')
+            ->get();
+
+        return view('manage', compact('decks'));
+    }
+
+    public function clearSkill(Request $request, int $skill): RedirectResponse
+    {
+        $skillModel = Deck::query()
+            ->where('user_id', $request->user()->id)
+            ->whereKey($skill)
+            ->firstOrFail();
+
+        DB::transaction(function () use ($skillModel): void {
+            Review::query()->where('deck_id', $skillModel->id)->delete();
+            Card::query()->where('deck_id', $skillModel->id)->delete();
+        });
+
+        $this->autoBackup((int) $request->user()->id);
+
+        return redirect()
+            ->route('manage.index')
+            ->with('status', 'All cards and reviews for the skill were removed.');
+    }
+
+    public function resetApp(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'confirm' => ['required', 'in:RESET'],
+        ]);
+
+        $userId = (int) $request->user()->id;
+
+        DB::transaction(function () use ($userId): void {
+            // Deleting decks will cascade to cards and reviews via foreign keys
+            Deck::query()->where('user_id', $userId)->delete();
+            Material::query()->where('user_id', $userId)->delete();
+        });
+
+        $this->autoBackup($userId);
+
+        return redirect()
+            ->route('manage.index')
+            ->with('status', 'Application reset: all skills, cards, reviews, and materials removed.');
+    }
+
     public function storeSkill(Request $request): RedirectResponse
     {
         $validated = $request->validate([

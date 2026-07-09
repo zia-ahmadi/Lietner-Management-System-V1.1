@@ -43,4 +43,9 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/backups/restore', [BackupController::class, 'restore'])->name('backups.restore');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    // Management tools: clear cards for a skill and reset user data
+    Route::get('/manage', [StudyController::class, 'manage'])->name('manage.index');
+    Route::post('/manage/clear-skill/{skill}', [StudyController::class, 'clearSkill'])->name('manage.clear_skill');
+    Route::post('/manage/reset', [StudyController::class, 'resetApp'])->name('manage.reset');
 });
