@@ -16,13 +16,15 @@
     <form method="POST" action="{{ route('cards.store') }}" class="stack">
         @csrf
         <div>
-            <label for="deck_id">Skill (optional)</label>
-            <select id="deck_id" name="deck_id">
+            <label for="skill-search-create">Skill (optional)</label>
+            <input id="skill-search-create" type="text" placeholder="Search skills" autocomplete="off">
+            <select id="deck_id" name="deck_id" size="8" style="margin-top:0.4rem;">
                 <option value="">No skill (use General Skill)</option>
                 @foreach ($decks as $deck)
                     <option value="{{ $deck->id }}">{{ $deck->name }}</option>
                 @endforeach
             </select>
+            <p class="muted" style="margin-top:0.35rem;">Type to filter skills instantly.</p>
         </div>
         <div>
             <label for="front_text">Question / Prompt</label>
@@ -114,13 +116,15 @@
                         @csrf
                         @method('PATCH')
                         <div>
-                            <label for="deck_{{ $card->id }}">Skill (optional)</label>
-                            <select id="deck_{{ $card->id }}" name="deck_id">
+                            <label for="skill-search-{{ $card->id }}">Skill (optional)</label>
+                            <input id="skill-search-{{ $card->id }}" type="text" placeholder="Search skills" autocomplete="off">
+                            <select id="deck_{{ $card->id }}" name="deck_id" size="8" style="margin-top:0.4rem;">
                                 <option value="">No skill (use General Skill)</option>
                                 @foreach ($decks as $deck)
                                     <option value="{{ $deck->id }}" @selected($card->deck_id === $deck->id)>{{ $deck->name }}</option>
                                 @endforeach
                             </select>
+                            <p class="muted" style="margin-top:0.35rem;">Type to filter skills instantly.</p>
                         </div>
                         <div>
                             <label for="front_{{ $card->id }}">Question / Prompt</label>
@@ -145,4 +149,55 @@
         <p class="muted">No cards yet. Create your first card above.</p>
     @endforelse
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const attachSkillSearch = function (inputId, selectId) {
+            const searchInput = document.getElementById(inputId);
+            const select = document.getElementById(selectId);
+
+            if (!searchInput || !select) {
+                return;
+            }
+
+            const options = Array.from(select.options);
+            const placeholderOption = options.find((option) => option.value === '');
+
+            const filterOptions = function () {
+                const query = searchInput.value.trim().toLowerCase();
+
+                options.forEach((option) => {
+                    if (!option.value) {
+                        option.hidden = false;
+                        return;
+                    }
+
+                    const matches = option.text.toLowerCase().includes(query);
+                    option.hidden = !matches;
+                });
+
+                if (placeholderOption) {
+                    placeholderOption.hidden = false;
+                }
+
+                if (select.options.length > 0) {
+                    const firstVisible = Array.from(select.options).find((option) => !option.hidden);
+                    if (firstVisible) {
+                        select.value = select.value && !select.options[select.selectedIndex]?.hidden ? select.value : firstVisible.value;
+                    }
+                }
+            };
+
+            searchInput.addEventListener('input', filterOptions);
+            filterOptions();
+        };
+
+        attachSkillSearch('skill-search-create', 'deck_id');
+
+        document.querySelectorAll('input[id^="skill-search-"]').forEach(function (input) {
+            const selectId = input.id.replace('skill-search-', 'deck_');
+            attachSkillSearch(input.id, selectId);
+        });
+    });
+</script>
 @endsection

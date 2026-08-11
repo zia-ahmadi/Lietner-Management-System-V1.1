@@ -126,7 +126,19 @@ class StudyController extends Controller
 
         $decks = Deck::query()
             ->where('user_id', $userId)
-            ->orderBy('name')
+            ->leftJoinSub(
+                Card::query()
+                    ->selectRaw('deck_id, MAX(created_at) as last_card_created_at')
+                    ->groupBy('deck_id'),
+                'card_usage',
+                'card_usage.deck_id',
+                '=',
+                'decks.id'
+            )
+            ->select('decks.*', 'card_usage.last_card_created_at')
+            ->orderByRaw('CASE WHEN card_usage.last_card_created_at IS NULL THEN 1 ELSE 0 END')
+            ->orderByDesc('card_usage.last_card_created_at')
+            ->orderBy('decks.name')
             ->get();
 
         return view('cards', compact('cards', 'dueCount', 'decks', 'filters'));

@@ -124,6 +124,40 @@ class CardsAndReviewTodayTest extends TestCase
         $response->assertDontSee('Second skill question');
     }
 
+    public function test_cards_page_prioritizes_recently_used_skills_in_skill_picker(): void
+    {
+        $user = User::factory()->create();
+        $oldDeck = Deck::create(['user_id' => $user->id, 'name' => 'Legacy Skill']);
+        $recentDeck = Deck::create(['user_id' => $user->id, 'name' => 'Recently Used Skill']);
+
+        Card::create([
+            'deck_id' => $oldDeck->id,
+            'front_text' => 'Old skill card',
+            'back_text' => 'Answer',
+            'box' => 1,
+            'review_streak' => 0,
+            'next_review_at' => now()->subWeek(),
+            'created_at' => now()->subWeek(),
+            'updated_at' => now()->subWeek(),
+        ]);
+
+        Card::create([
+            'deck_id' => $recentDeck->id,
+            'front_text' => 'Recent skill card',
+            'back_text' => 'Answer',
+            'box' => 1,
+            'review_streak' => 0,
+            'next_review_at' => now()->subMinute(),
+            'created_at' => now()->subMinute(),
+            'updated_at' => now()->subMinute(),
+        ]);
+
+        $response = $this->actingAs($user)->get('/cards');
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Recently Used Skill', 'Legacy Skill']);
+    }
+
     public function test_newly_created_card_is_visible_in_review_today(): void
     {
         $user = User::factory()->create();
