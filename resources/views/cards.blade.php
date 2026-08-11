@@ -17,14 +17,15 @@
         @csrf
         <div>
             <label for="skill-search-create">Skill (optional)</label>
-            <input id="skill-search-create" type="text" placeholder="Search skills" autocomplete="off">
-            <select id="deck_id" name="deck_id" size="8" style="margin-top:0.4rem;">
-                <option value="">No skill (use General Skill)</option>
+            <input id="skill-search-create" name="skill_lookup" type="text" placeholder="Search skills" autocomplete="off" list="skill-options-create" value="{{ old('skill_lookup') }}" style="width:100%;">
+            <input type="hidden" id="deck_id" name="deck_id" value="{{ old('deck_id', '') }}">
+            <datalist id="skill-options-create">
+                <option value="No skill (use General Skill)" data-deck-id=""></option>
                 @foreach ($decks as $deck)
-                    <option value="{{ $deck->id }}">{{ $deck->name }}</option>
+                    <option value="{{ $deck->name }}" data-deck-id="{{ $deck->id }}"></option>
                 @endforeach
-            </select>
-            <p class="muted" style="margin-top:0.35rem;">Type to filter skills instantly.</p>
+            </datalist>
+            <p class="muted" style="margin-top:0.45rem;">Type to find a skill quickly.</p>
         </div>
         <div>
             <label for="front_text">Question / Prompt</label>
@@ -117,14 +118,15 @@
                         @method('PATCH')
                         <div>
                             <label for="skill-search-{{ $card->id }}">Skill (optional)</label>
-                            <input id="skill-search-{{ $card->id }}" type="text" placeholder="Search skills" autocomplete="off">
-                            <select id="deck_{{ $card->id }}" name="deck_id" size="8" style="margin-top:0.4rem;">
-                                <option value="">No skill (use General Skill)</option>
+                            <input id="skill-search-{{ $card->id }}" name="skill_lookup" type="text" placeholder="Search skills" autocomplete="off" list="skill-options-{{ $card->id }}" value="{{ $card->deck?->name ?? '' }}" style="width:100%;">
+                            <input type="hidden" id="deck_{{ $card->id }}" name="deck_id" value="{{ $card->deck_id ?? '' }}">
+                            <datalist id="skill-options-{{ $card->id }}">
+                                <option value="No skill (use General Skill)" data-deck-id=""></option>
                                 @foreach ($decks as $deck)
-                                    <option value="{{ $deck->id }}" @selected($card->deck_id === $deck->id)>{{ $deck->name }}</option>
+                                    <option value="{{ $deck->name }}" data-deck-id="{{ $deck->id }}"></option>
                                 @endforeach
-                            </select>
-                            <p class="muted" style="margin-top:0.35rem;">Type to filter skills instantly.</p>
+                            </datalist>
+                            <p class="muted" style="margin-top:0.45rem;">Type to find a skill quickly.</p>
                         </div>
                         <div>
                             <label for="front_{{ $card->id }}">Question / Prompt</label>
@@ -152,51 +154,36 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const attachSkillSearch = function (inputId, selectId) {
+        const attachSkillLookup = function (inputId, hiddenInputId) {
             const searchInput = document.getElementById(inputId);
-            const select = document.getElementById(selectId);
+            const hiddenInput = document.getElementById(hiddenInputId);
 
-            if (!searchInput || !select) {
+            if (!searchInput || !hiddenInput) {
                 return;
             }
 
-            const options = Array.from(select.options);
-            const placeholderOption = options.find((option) => option.value === '');
+            const syncSelection = function () {
+                const inputValue = searchInput.value.trim();
+                const option = document.querySelector('#' + searchInput.getAttribute('list') + ' option[value="' + CSS.escape(inputValue) + '"]');
 
-            const filterOptions = function () {
-                const query = searchInput.value.trim().toLowerCase();
-
-                options.forEach((option) => {
-                    if (!option.value) {
-                        option.hidden = false;
-                        return;
-                    }
-
-                    const matches = option.text.toLowerCase().includes(query);
-                    option.hidden = !matches;
-                });
-
-                if (placeholderOption) {
-                    placeholderOption.hidden = false;
+                if (!option) {
+                    hiddenInput.value = '';
+                    return;
                 }
 
-                if (select.options.length > 0) {
-                    const firstVisible = Array.from(select.options).find((option) => !option.hidden);
-                    if (firstVisible) {
-                        select.value = select.value && !select.options[select.selectedIndex]?.hidden ? select.value : firstVisible.value;
-                    }
-                }
+                hiddenInput.value = option.getAttribute('data-deck-id') || '';
             };
 
-            searchInput.addEventListener('input', filterOptions);
-            filterOptions();
+            searchInput.addEventListener('input', syncSelection);
+            searchInput.addEventListener('change', syncSelection);
+            syncSelection();
         };
 
-        attachSkillSearch('skill-search-create', 'deck_id');
+        attachSkillLookup('skill-search-create', 'deck_id');
 
         document.querySelectorAll('input[id^="skill-search-"]').forEach(function (input) {
-            const selectId = input.id.replace('skill-search-', 'deck_');
-            attachSkillSearch(input.id, selectId);
+            const hiddenInputId = input.id.replace('skill-search-', 'deck_');
+            attachSkillLookup(input.id, hiddenInputId);
         });
     });
 </script>
