@@ -132,15 +132,28 @@ class StudyController extends Controller
         return view('cards', compact('cards', 'dueCount', 'decks', 'filters'));
     }
 
-    public function reviewToday(): View
+    public function reviewToday(Request $request): View
     {
         $userId = (int) auth()->id();
 
-        $dueCards = $this->userCardQuery($userId)
+        $filters = $request->validate([
+            'deck_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('decks', 'id')->where(fn ($query) => $query->where('user_id', $userId)),
+            ],
+        ]);
+
+        $dueCardsQuery = $this->userCardQuery($userId)
             ->with('deck:id,name')
             ->due()
-            ->orderBy('next_review_at')
-            ->get();
+            ->orderBy('next_review_at');
+
+        if (array_key_exists('deck_id', $filters) && $filters['deck_id'] !== null) {
+            $dueCardsQuery->where('deck_id', (int) $filters['deck_id']);
+        }
+
+        $dueCards = $dueCardsQuery->get();
 
         $currentCard = $dueCards->first();
 
@@ -149,11 +162,19 @@ class StudyController extends Controller
             ->orderBy('name')
             ->get();
 
+        $selectedDeckId = $filters['deck_id'] ?? null;
+
+        $selectedDeck = $selectedDeckId !== null
+            ? $decks->firstWhere('id', (int) $selectedDeckId)
+            : null;
+
         return view('review-today', [
             'currentCard' => $currentCard,
             'dueCount' => $dueCards->count(),
             'upcomingCards' => $dueCards->skip(1)->take(5),
             'decks' => $decks,
+            'selectedDeck' => $selectedDeck,
+            'selectedDeckId' => $selectedDeckId,
         ]);
     }
 
@@ -161,6 +182,11 @@ class StudyController extends Controller
     {
         $validated = $request->validate([
             'result' => ['required', 'in:correct,wrong'],
+            'deck_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('decks', 'id')->where(fn ($query) => $query->where('user_id', $request->user()->id)),
+            ],
         ]);
 
         $cardModel = $this->findUserCardOrFail((int) $request->user()->id, $card);
@@ -183,8 +209,13 @@ class StudyController extends Controller
         });
         $this->autoBackup((int) $request->user()->id);
 
+        $redirectParameters = [];
+        if (!empty($validated['deck_id'])) {
+            $redirectParameters['deck_id'] = (int) $validated['deck_id'];
+        }
+
         return redirect()
-            ->route('review.today')
+            ->route('review.today', $redirectParameters)
             ->with('status', 'Review saved. Next card loaded.');
     }
 

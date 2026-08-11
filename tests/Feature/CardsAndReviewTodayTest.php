@@ -93,6 +93,37 @@ class CardsAndReviewTodayTest extends TestCase
         $this->assertTrue($card->next_review_at->isSameDay(now()->addDay()));
     }
 
+    public function test_review_today_can_be_filtered_to_a_specific_skill(): void
+    {
+        $user = User::factory()->create();
+        $firstDeck = Deck::create(['user_id' => $user->id, 'name' => 'First Skill']);
+        $secondDeck = Deck::create(['user_id' => $user->id, 'name' => 'Second Skill']);
+
+        Card::create([
+            'deck_id' => $firstDeck->id,
+            'front_text' => 'First skill question',
+            'back_text' => 'Answer one',
+            'box' => 1,
+            'review_streak' => 0,
+            'next_review_at' => now()->subMinute(),
+        ]);
+
+        Card::create([
+            'deck_id' => $secondDeck->id,
+            'front_text' => 'Second skill question',
+            'back_text' => 'Answer two',
+            'box' => 1,
+            'review_streak' => 0,
+            'next_review_at' => now()->subMinute(),
+        ]);
+
+        $response = $this->actingAs($user)->get('/review-today?deck_id='.$firstDeck->id);
+
+        $response->assertOk();
+        $response->assertSee('First skill question');
+        $response->assertDontSee('Second skill question');
+    }
+
     public function test_newly_created_card_is_visible_in_review_today(): void
     {
         $user = User::factory()->create();

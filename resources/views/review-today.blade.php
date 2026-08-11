@@ -6,6 +6,20 @@
     <span class="muted">Due cards: {{ $dueCount }}</span>
 </div>
 
+<form method="GET" action="{{ route('review.today') }}" class="actions" style="margin-bottom:1rem; flex-wrap:wrap;">
+    <label for="deck-filter" style="margin-right:0.5rem;">Skill</label>
+    <select id="deck-filter" name="deck_id" style="min-width:12rem;">
+        <option value="">All skills</option>
+        @foreach ($decks as $deck)
+            <option value="{{ $deck->id }}" @selected($selectedDeckId === $deck->id)>{{ $deck->name }}</option>
+        @endforeach
+    </select>
+    <button type="submit" class="btn btn-soft">Filter</button>
+    @if ($selectedDeckId)
+        <a href="{{ route('review.today') }}" class="btn btn-soft">Show All</a>
+    @endif
+</form>
+
 @if ($currentCard)
     <section class="panel" style="margin-bottom:1rem;">
         <div class="meta">Skill: {{ $currentCard->deck?->name }} | Box {{ $currentCard->box }}</div>
@@ -18,8 +32,8 @@
 
             <div class="actions" style="margin-top:1rem;">
                 <button id="show-answer-btn" type="button" class="btn btn-soft">Show Answer</button>
-                <form method="POST" action="{{ route('review.submit', $currentCard->id) }}">@csrf<button type="submit" name="result" value="correct" class="btn btn-primary">I Got It Correct</button></form>
-                <form method="POST" action="{{ route('review.submit', $currentCard->id) }}">@csrf<button type="submit" name="result" value="wrong" class="btn btn-soft">I Got It Wrong</button></form>
+                <form method="POST" action="{{ route('review.submit', $currentCard->id) }}">@csrf<input type="hidden" name="deck_id" value="{{ $selectedDeckId ?? '' }}"><button type="submit" name="result" value="correct" class="btn btn-primary">I Got It Correct</button></form>
+                <form method="POST" action="{{ route('review.submit', $currentCard->id) }}">@csrf<input type="hidden" name="deck_id" value="{{ $selectedDeckId ?? '' }}"><button type="submit" name="result" value="wrong" class="btn btn-soft">I Got It Wrong</button></form>
                 <button type="button" class="btn btn-soft" onclick="toggleEdit({{ $currentCard->id }})">Edit Card</button>
             </div>
 
