@@ -18,6 +18,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/framework/leitner-dev-server.pid
 /vendor
 Homestead.json
 Homestead.yaml

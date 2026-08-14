@@ -7,6 +7,22 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Start the Leitner application
+
+Run the project launcher from any terminal location:
+
+```bash
+start-leitner
+```
+
+It starts the app on `http://127.0.0.1:8137` and opens the URL with Ubuntu's default browser. The script detects an already-running Leitner server and avoids starting it twice. To temporarily use another port, set `LEITNER_PORT`, for example `LEITNER_PORT=8138 start-leitner`. For a headless session, use `LEITNER_NO_BROWSER=1 start-leitner`.
+
+To completely stop the background development server, run this from any directory:
+
+```bash
+stop-leitner
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
