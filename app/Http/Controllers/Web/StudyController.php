@@ -23,7 +23,7 @@ class StudyController extends Controller
         return view('home');
     }
 
-    public function dashboard(LeitnerScheduler $scheduler): View
+    public function dashboard(): View
     {
         $user = auth()->user();
 
@@ -50,7 +50,22 @@ class StudyController extends Controller
             'total_reviews' => Review::query()->whereHas('deck', fn ($q) => $q->where('user_id', $user->id))->count(),
         ];
 
-        return view('dashboard', compact('decks', 'dueCards', 'stats'));
+        $upcomingDueForecast = $this->calculateUpcomingDueForecast((int) $user->id, 6, 'hours');
+
+        return view('dashboard', compact('decks', 'dueCards', 'stats', 'upcomingDueForecast'));
+    }
+
+    public function upcomingDueForecast(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'value' => ['nullable', 'integer', 'min:1', 'max:90'],
+            'unit' => ['nullable', 'in:hours,days'],
+        ]);
+
+        $value = (int) ($validated['value'] ?? 6);
+        $unit = $validated['unit'] ?? 'hours';
+
+        return response()->json($this->calculateUpcomingDueForecast((int) $request->user()->id, $value, $unit));
     }
 
     public function skills(): View
@@ -222,7 +237,7 @@ class StudyController extends Controller
         $this->autoBackup((int) $request->user()->id);
 
         $redirectParameters = [];
-        if (!empty($validated['deck_id'])) {
+        if (! empty($validated['deck_id'])) {
             $redirectParameters['deck_id'] = (int) $validated['deck_id'];
         }
 
@@ -457,6 +472,27 @@ class StudyController extends Controller
     private function userCardQuery(int $userId): Builder
     {
         return Card::query()->whereHas('deck', fn ($query) => $query->where('user_id', $userId));
+    }
+
+    /**
+     * Cards that are scheduled in the requested future window, excluding cards already due.
+     *
+     * @return array{count: int, end_at: string}
+     */
+    private function calculateUpcomingDueForecast(int $userId, int $value, string $unit): array
+    {
+        $start = now();
+        $end = $unit === 'days'
+            ? $start->copy()->addDays($value)
+            : $start->copy()->addHours($value);
+
+        return [
+            'count' => $this->userCardQuery($userId)
+                ->where('next_review_at', '>', $start)
+                ->where('next_review_at', '<=', $end)
+                ->count(),
+            'end_at' => $end->toIso8601String(),
+        ];
     }
 
     private function findUserCardOrFail(int $userId, int $cardId): Card

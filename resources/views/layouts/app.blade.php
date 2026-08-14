@@ -143,11 +143,22 @@
             font-size: 0.98rem;
             color: var(--ink);
         }
+        .forecast-panel { margin-top: 1rem; }
+        .forecast-layout { display: flex; gap: 1rem; align-items: end; justify-content: space-between; flex-wrap: wrap; }
+        .forecast-result { display: grid; gap: 0.18rem; min-width: 15rem; }
+        .forecast-count { color: var(--brand-deep); font-size: 2rem; font-weight: 800; line-height: 1; }
+        .forecast-label { color: var(--ink); font-weight: 700; }
+        .forecast-controls { width: min(100%, 28rem); display: grid; gap: 0.35rem; }
+        .forecast-custom { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-top: 0.3rem; }
         @media (max-width: 950px) {
             .grid.two,
             .grid.three,
             .grid.six,
             .grid[style*='repeat(5'] { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 520px) {
+            .forecast-custom { grid-template-columns: 1fr; }
+            .forecast-controls { width: 100%; }
         }
     </style>
 </head>

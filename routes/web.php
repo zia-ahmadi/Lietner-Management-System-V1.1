@@ -18,6 +18,7 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', [StudyController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/upcoming-due', [StudyController::class, 'upcomingDueForecast'])->name('dashboard.upcoming-due');
 
     Route::get('/skills', [StudyController::class, 'skills'])->name('skills.index');
     Route::post('/skills', [StudyController::class, 'storeSkill'])->name('skills.store');

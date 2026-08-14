@@ -73,4 +73,21 @@ class WebAuthOwnershipTest extends TestCase
         $materials->assertSee('Owner material');
         $materials->assertDontSee('Other material');
     }
+
+    public function test_dashboard_upcoming_due_forecast_counts_only_future_cards_for_the_authenticated_user(): void
+    {
+        $owner = User::factory()->create();
+        $other = User::factory()->create();
+        $ownerDeck = Deck::create(['user_id' => $owner->id, 'name' => 'Owner Deck']);
+        $otherDeck = Deck::create(['user_id' => $other->id, 'name' => 'Other Deck']);
+
+        Card::create(['deck_id' => $ownerDeck->id, 'front_text' => 'Soon', 'back_text' => '', 'next_review_at' => now()->addHours(2)]);
+        Card::create(['deck_id' => $ownerDeck->id, 'front_text' => 'Later', 'back_text' => '', 'next_review_at' => now()->addDays(4)]);
+        Card::create(['deck_id' => $ownerDeck->id, 'front_text' => 'Already due', 'back_text' => '', 'next_review_at' => now()->subMinute()]);
+        Card::create(['deck_id' => $otherDeck->id, 'front_text' => 'Other user', 'back_text' => '', 'next_review_at' => now()->addHour()]);
+
+        $response = $this->actingAs($owner)->getJson('/dashboard/upcoming-due?value=3&unit=days');
+
+        $response->assertOk()->assertJsonPath('count', 1)->assertJsonStructure(['count', 'end_at']);
+    }
 }
