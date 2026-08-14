@@ -27,7 +27,7 @@
         {{-- View mode --}}
         <div id="card-view-{{ $currentCard->id }}">
             <div class="text-panel scroll" style="margin-top:0.7rem;">
-                <div class="text-rich text-front">{{ $currentCard->front_text }}</div>
+                <div class="text-rich text-front card-content" dir="auto">{{ $currentCard->front_text }}</div>
             </div>
 
             <div class="actions" style="margin-top:1rem;">
@@ -40,7 +40,7 @@
             <div id="answer-box" class="panel" style="display:none; margin-top:0.9rem; background:#f7fffc; border-color:#c8e9e3;">
                 <strong>Answer</strong>
                 <div class="text-panel scroll" style="margin-top:0.45rem;">
-                    <div class="text-rich">{{ $currentCard->back_text ?: 'No answer saved for this card.' }}</div>
+                    <div class="text-rich card-content" dir="auto">{{ $currentCard->back_text ?: 'No answer saved for this card.' }}</div>
                 </div>
             </div>
         </div>
@@ -60,11 +60,11 @@
             </div>
             <div>
                 <label for="front_{{ $currentCard->id }}">Question / Prompt</label>
-                <textarea id="front_{{ $currentCard->id }}" name="front_text" rows="3" required>{{ $currentCard->front_text }}</textarea>
+                <textarea id="front_{{ $currentCard->id }}" name="front_text" rows="3" dir="auto" class="card-content" required>{{ $currentCard->front_text }}</textarea>
             </div>
             <div>
                 <label for="back_{{ $currentCard->id }}">Answer / Notes (optional)</label>
-                <textarea id="back_{{ $currentCard->id }}" name="back_text" rows="5">{{ $currentCard->back_text }}</textarea>
+                <textarea id="back_{{ $currentCard->id }}" name="back_text" rows="5" dir="auto" class="card-content">{{ $currentCard->back_text }}</textarea>
             </div>
             <div class="actions">
                 <button type="button" class="btn btn-soft" onclick="toggleEdit({{ $currentCard->id }})">Cancel</button>
@@ -78,7 +78,7 @@
         @forelse ($upcomingCards as $card)
             <div style="margin-bottom:0.5rem;" id="upcoming-view-{{ $card->id }}">
                 <div class="list-item" style="margin-bottom:0;">
-                    <div class="text-rich">{{ \Illuminate\Support\Str::limit($card->front_text, 180) }}</div>
+                    <div class="text-rich card-content" dir="auto">{{ \Illuminate\Support\Str::limit($card->front_text, 180) }}</div>
                     <div class="meta" style="margin-top:0.25rem;">Skill: {{ $card->deck?->name }} | Box {{ $card->box }} | Due: {{ $card->next_review_at?->format('Y-m-d H:i') }}</div>
                 </div>
                 <div style="margin-top:0.3rem;">
@@ -91,11 +91,11 @@
                 @method('PATCH')
                 <div style="margin-bottom:0.65rem;">
                     <label for="upcoming_front_{{ $card->id }}">Question / Prompt</label>
-                    <textarea id="upcoming_front_{{ $card->id }}" name="front_text" rows="2" required style="width:100%;">{{ $card->front_text }}</textarea>
+                    <textarea id="upcoming_front_{{ $card->id }}" name="front_text" rows="2" dir="auto" class="card-content" required style="width:100%;">{{ $card->front_text }}</textarea>
                 </div>
                 <div style="margin-bottom:0.65rem;">
                     <label for="upcoming_back_{{ $card->id }}">Answer / Notes (optional)</label>
-                    <textarea id="upcoming_back_{{ $card->id }}" name="back_text" rows="3" style="width:100%;">{{ $card->back_text }}</textarea>
+                    <textarea id="upcoming_back_{{ $card->id }}" name="back_text" rows="3" dir="auto" class="card-content" style="width:100%;">{{ $card->back_text }}</textarea>
                 </div>
                 <div class="actions">
                     <button type="button" class="btn btn-soft" onclick="toggleUpcomingEdit({{ $card->id }})">Cancel</button>

@@ -29,11 +29,11 @@
         </div>
         <div>
             <label for="front_text">Question / Prompt</label>
-            <textarea id="front_text" name="front_text" rows="3" placeholder="Enter concept, question, or long note title" required>{{ old('front_text') }}</textarea>
+            <textarea id="front_text" name="front_text" rows="3" placeholder="Enter concept, question, or long note title" dir="auto" class="card-content" required>{{ old('front_text') }}</textarea>
         </div>
         <div>
             <label for="back_text">Answer / Notes (optional)</label>
-            <textarea id="back_text" name="back_text" rows="5" placeholder="Optional detailed explanation, keywords, or summary">{{ old('back_text') }}</textarea>
+            <textarea id="back_text" name="back_text" rows="5" placeholder="Optional detailed explanation, keywords, or summary" dir="auto" class="card-content">{{ old('back_text') }}</textarea>
         </div>
         <div><button class="btn btn-primary" type="submit">Create Card</button></div>
     </form>
@@ -95,13 +95,13 @@
         <article class="list-item" style="margin-bottom:0.75rem;">
             <div class="page-header" style="margin-bottom:0.35rem;">
                 <div class="text-panel scroll" style="flex:1; min-width:220px;">
-                    <div class="text-rich text-front">{{ $card->front_text }}</div>
+                    <div class="text-rich text-front card-content" dir="auto">{{ $card->front_text }}</div>
                 </div>
                 <small class="meta">Created: {{ $card->created_at?->format('Y-m-d H:i') }}</small>
             </div>
 
             <div class="text-panel scroll" style="margin:0.35rem 0;">
-                <div class="text-rich">{{ $card->back_text ?: 'No answer saved for this card.' }}</div>
+                <div class="text-rich card-content" dir="auto">{{ $card->back_text ?: 'No answer saved for this card.' }}</div>
             </div>
 
             <div class="meta" style="margin-bottom:0.6rem;">
@@ -130,11 +130,11 @@
                         </div>
                         <div>
                             <label for="front_{{ $card->id }}">Question / Prompt</label>
-                            <textarea id="front_{{ $card->id }}" name="front_text" rows="3" required>{{ $card->front_text }}</textarea>
+                            <textarea id="front_{{ $card->id }}" name="front_text" rows="3" dir="auto" class="card-content" required>{{ $card->front_text }}</textarea>
                         </div>
                         <div>
                             <label for="back_{{ $card->id }}">Answer / Notes (optional)</label>
-                            <textarea id="back_{{ $card->id }}" name="back_text" rows="5">{{ $card->back_text }}</textarea>
+                            <textarea id="back_{{ $card->id }}" name="back_text" rows="5" dir="auto" class="card-content">{{ $card->back_text }}</textarea>
                         </div>
                         <div><button type="submit" class="btn btn-primary">Save Changes</button></div>
                     </form>

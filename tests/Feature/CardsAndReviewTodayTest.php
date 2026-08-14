@@ -173,4 +173,26 @@ class CardsAndReviewTodayTest extends TestCase
         $response->assertOk();
         $response->assertSee('New card for day 1');
     }
+
+    public function test_card_content_uses_automatic_text_direction_in_list_review_and_edit_views(): void
+    {
+        $user = User::factory()->create();
+        $deck = Deck::create(['user_id' => $user->id, 'name' => 'Language Skill']);
+
+        Card::create([
+            'deck_id' => $deck->id,
+            'front_text' => 'این یک API test است',
+            'back_text' => 'پاسخ با Laravel',
+            'next_review_at' => now()->subMinute(),
+        ]);
+
+        $cardsResponse = $this->actingAs($user)->get('/cards');
+        $cardsResponse->assertOk();
+        $cardsResponse->assertSee('dir="auto"', false);
+        $cardsResponse->assertSee('unicode-bidi: plaintext', false);
+
+        $reviewResponse = $this->actingAs($user)->get('/review-today');
+        $reviewResponse->assertOk();
+        $reviewResponse->assertSee('dir="auto"', false);
+    }
 }

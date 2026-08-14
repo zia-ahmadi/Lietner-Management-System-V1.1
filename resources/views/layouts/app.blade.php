@@ -123,6 +123,11 @@
             word-break: break-word;
             line-height: 1.38;
         }
+        /* Let the Unicode bidirectional algorithm resolve each card paragraph independently. */
+        .card-content {
+            unicode-bidi: plaintext;
+            text-align: start;
+        }
         .text-panel {
             border: 1px solid #dbe7ef;
             background: #fbfdff;
