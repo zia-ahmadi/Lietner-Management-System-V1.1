@@ -177,7 +177,6 @@
                 <a href="{{ route('cards.index') }}" class="{{ request()->routeIs('cards.index') ? 'active' : '' }}">Cards</a>
                 <a href="{{ route('review.today') }}" class="{{ request()->routeIs('review.today') ? 'active' : '' }}">Review Today</a>
                 <a href="{{ route('materials') }}" class="{{ request()->routeIs('materials') ? 'active' : '' }}">Materials</a>
-                <a href="{{ route('backups.index') }}" class="{{ request()->routeIs('backups.*') ? 'active' : '' }}">Backups</a>
                 <a href="{{ route('manage.index') }}" class="{{ request()->routeIs('manage.*') ? 'active' : '' }}">Manage</a>
                 <a href="{{ route('settings.edit') }}" class="{{ request()->routeIs('settings.*') ? 'active' : '' }}">Settings</a>
                 <form method="POST" action="{{ route('logout') }}" style="display:inline; margin:0;">

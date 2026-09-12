@@ -17,7 +17,8 @@ class SettingsPageTest extends TestCase
         $this->actingAs($user)
             ->get('/settings')
             ->assertOk()
-            ->assertSee('Launch Settings');
+            ->assertSee('Local Launcher Settings')
+            ->assertSee('Backup Management');
 
         $this->actingAs($user)->put('/settings', [
             'project_path' => base_path(),

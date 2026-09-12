@@ -67,7 +67,7 @@ class BackupController extends Controller
         File::put($filePath, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         return redirect()
-            ->route('backups.index', ['path' => $backupPath])
+            ->route('settings.edit', ['path' => $backupPath])
             ->with('status', 'Backup created successfully: '.$fileName)
             ->with('backup_path', $backupPath);
     }
@@ -183,7 +183,7 @@ class BackupController extends Controller
         app(AutoBackupService::class)->backupUser($userId);
 
         return redirect()
-            ->route('backups.index', ['path' => $backupPath])
+            ->route('settings.edit', ['path' => $backupPath])
             ->with('status', 'Backup restored successfully.')
             ->with('backup_path', $backupPath);
     }

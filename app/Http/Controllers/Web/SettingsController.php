@@ -13,6 +13,8 @@ class SettingsController extends Controller
     public function edit(Request $request): View
     {
         $user = $request->user();
+        $defaultBackupPath = storage_path('app/backups/user_'.$user->id);
+        $backupPath = (string) ($request->query('path') ?? session('backup_path', $defaultBackupPath));
 
         return view('settings', [
             'settings' => [
@@ -22,6 +24,8 @@ class SettingsController extends Controller
                 'launch_port' => $user->launch_port ?: 8137,
                 'open_browser' => $user->open_browser ?? true,
             ],
+            'backupPath' => $backupPath,
+            'backups' => $this->recentBackups($backupPath),
         ]);
     }
 
@@ -58,5 +62,30 @@ class SettingsController extends Controller
         ]);
 
         return redirect()->route('settings.edit')->with('status', 'Launch settings saved.');
+    }
+
+    /**
+     * @return array<int, array<string, string|int>>
+     */
+    private function recentBackups(string $backupPath): array
+    {
+        if (! File::isDirectory($backupPath)) {
+            return [];
+        }
+
+        return collect(File::files($backupPath))
+            ->filter(fn ($file) => str_starts_with($file->getFilename(), 'leitner_backup_'))
+            ->sortByDesc(fn ($file) => $file->getMTime())
+            ->take(15)
+            ->map(function ($file): array {
+                return [
+                    'name' => $file->getFilename(),
+                    'path' => $file->getPathname(),
+                    'size_kb' => (int) ceil($file->getSize() / 1024),
+                    'modified_at' => date('Y-m-d H:i:s', $file->getMTime()),
+                ];
+            })
+            ->values()
+            ->all();
     }
 }
