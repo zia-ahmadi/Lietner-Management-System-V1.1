@@ -26,7 +26,11 @@ if [[ "$server_command" != *"artisan serve"* ]]; then
     exit 1
 fi
 
-kill "$server_pid"
+child_pids="$(pgrep -P "$server_pid" 2>/dev/null || true)"
+if [[ -n "$child_pids" ]]; then
+    kill $child_pids 2>/dev/null || true
+fi
+kill "$server_pid" 2>/dev/null || true
 
 for _ in {1..25}; do
     if ! kill -0 "$server_pid" 2>/dev/null; then
