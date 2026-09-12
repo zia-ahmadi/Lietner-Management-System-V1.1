@@ -10,13 +10,16 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    public function edit(Request $request): View
+    public function index(): View
+    {
+        return view('settings.index');
+    }
+
+    public function launcher(Request $request): View
     {
         $user = $request->user();
-        $defaultBackupPath = storage_path('app/backups/user_'.$user->id);
-        $backupPath = (string) ($request->query('path') ?? session('backup_path', $defaultBackupPath));
 
-        return view('settings', [
+        return view('settings.launcher', [
             'settings' => [
                 'project_path' => $user->project_path ?: base_path(),
                 'start_script_path' => $user->start_script_path ?: base_path('start-leitner.sh'),
@@ -24,6 +27,15 @@ class SettingsController extends Controller
                 'launch_port' => $user->launch_port ?: 8137,
                 'open_browser' => $user->open_browser ?? true,
             ],
+        ]);
+    }
+
+    public function backups(Request $request): View
+    {
+        $defaultBackupPath = storage_path('app/backups/user_'.auth()->id());
+        $backupPath = (string) ($request->query('path') ?? session('backup_path', $defaultBackupPath));
+
+        return view('settings.backups', [
             'backupPath' => $backupPath,
             'backups' => $this->recentBackups($backupPath),
         ]);
@@ -61,7 +73,7 @@ class SettingsController extends Controller
             'open_browser' => $request->boolean('open_browser'),
         ]);
 
-        return redirect()->route('settings.edit')->with('status', 'Launch settings saved.');
+        return redirect()->route('settings.launcher')->with('status', 'Launch settings saved.');
     }
 
     /**

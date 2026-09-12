@@ -44,8 +44,10 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/backups', [BackupController::class, 'store'])->name('backups.store');
     Route::post('/backups/restore', [BackupController::class, 'restore'])->name('backups.restore');
 
-    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
-    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.edit');
+    Route::get('/settings/local-launcher', [SettingsController::class, 'launcher'])->name('settings.launcher');
+    Route::put('/settings/local-launcher', [SettingsController::class, 'update'])->name('settings.launcher.update');
+    Route::get('/settings/backups', [SettingsController::class, 'backups'])->name('settings.backups');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
