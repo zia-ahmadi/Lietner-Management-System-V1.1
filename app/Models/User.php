@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'project_path',
+        'start_script_path',
+        'stop_script_path',
+        'launch_port',
+        'open_browser',
     ];
 
     /**
@@ -43,6 +48,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'launch_port' => 'integer',
+            'open_browser' => 'boolean',
         ];
     }
 

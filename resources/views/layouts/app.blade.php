@@ -179,6 +179,7 @@
                 <a href="{{ route('materials') }}" class="{{ request()->routeIs('materials') ? 'active' : '' }}">Materials</a>
                 <a href="{{ route('backups.index') }}" class="{{ request()->routeIs('backups.*') ? 'active' : '' }}">Backups</a>
                 <a href="{{ route('manage.index') }}" class="{{ request()->routeIs('manage.*') ? 'active' : '' }}">Manage</a>
+                <a href="{{ route('settings.edit') }}" class="{{ request()->routeIs('settings.*') ? 'active' : '' }}">Settings</a>
                 <form method="POST" action="{{ route('logout') }}" style="display:inline; margin:0;">
                     @csrf
                     <button type="submit" class="btn btn-soft" style="padding:0.42rem 0.72rem;">Logout</button>

@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Web\BackupController;
 use App\Http\Controllers\Web\StudyController;
+use App\Http\Controllers\Web\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StudyController::class, 'home'])->name('home');
@@ -42,6 +43,9 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/backups', [BackupController::class, 'index'])->name('backups.index');
     Route::post('/backups', [BackupController::class, 'store'])->name('backups.store');
     Route::post('/backups/restore', [BackupController::class, 'restore'])->name('backups.restore');
+
+    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
